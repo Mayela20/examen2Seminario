@@ -5,47 +5,44 @@ var cookieParser = require('cookie-parser');
 var lessMiddleware = require('less-middleware');
 var logger = require('morgan');
 
+function initApp(db)
+{
+      var app = express();
 
-function initApp(db){
+      // view engine setup
+      app.set('views', path.join(__dirname, 'views'));
+      app.set('view engine', 'hbs');
 
+      app.use(logger('dev'));
+      app.use(express.json());
+      app.use(express.urlencoded({ extended: false }));
+      app.use(cookieParser());
+      app.use(lessMiddleware(path.join(__dirname, 'public')));
+      app.use(express.static(path.join(__dirname, 'public')));
 
-var app = express();
+      var indexRouter = require('./routes/index');
+      app.use('/', indexRouter);
+      // incluir las rutas especificas para la entidad
+      var apiRouter = require('./routes/api/index')(db);
+      app.use('/api', apiRouter);
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+      // catch 404 and forward to error handler
+      app.use(function(req, res, next) {
+        next(createError(404));
+      });
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(lessMiddleware(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public')));
+      // error handler
+      app.use(function(err, req, res, next) {
+        // set locals, only providing error in development
+        res.locals.message = err.message;
+        res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-var indexRouter = require('./routes/index');
-app.use('/', indexRouter);
-// incluir las rutas especificas para la entidad
-var apiRouter = require('./routes/api/index')(db);
+        // render the error page
+        res.status(err.status || 500);
+        res.render('error');
+      });
 
-app.use('/api', apiRouter);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
- return app;
-}// end initApp
+      return app;
+} //end init
 
 module.exports = initApp;
