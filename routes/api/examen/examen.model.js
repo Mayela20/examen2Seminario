@@ -35,4 +35,25 @@ function mangasModel(db)
         );
     } // end getAllProducts
 
-   
+    mangaModel.saveNewmanga = (newmanga, handler)=>
+    {
+        mangaCollection.insertOne(newmanga, (err, result)=>
+        {
+          if(err)
+          {
+            console.log(err);
+            return handler(err, null);
+          }
+          return handler(null, result);
+        }); //insertOne
+    }
+
+    mangaModel.updatemanga = (updateFields, mangaId, handler)=>{
+        let mangaFilter = {"_id": new ObjectId(mangaId)};
+        let updateObject = {
+          "$set": {
+                    "nombre": updateFields.nombre,
+                    "autor": updateFields.autor,
+                    "pais origen": updateFields.paisorigen
+                }
+    };
