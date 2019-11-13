@@ -57,3 +57,34 @@ function mangasModel(db)
                     "pais origen": updateFields.paisorigen
                 }
     };
+
+    
+    mangaCollection.updateOne(
+        mangaFilter,
+        updateObject,
+        (err, rslt)=>{
+          if(err){
+            console.log(err);
+            return handler(err, null);
+          }
+          return handler(null, rslt);
+        }
+      );
+    }; // updateObject
+
+    mangasModel.deletemangas = (id, handler)=>
+    {
+      var query = {"_id": new ObjectId(id)};
+      mangasCollection.deleteOne(query, (err, rslt)=>{
+          if(err)
+          {
+            console.log(err);
+            return handler(err, null);
+          }
+          return handler(null, rslt);
+      })//deleteone
+    }
+
+    return mangasModel;
+}
+module.exports = mangasModel;
